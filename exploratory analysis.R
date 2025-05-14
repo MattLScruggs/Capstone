@@ -4,11 +4,11 @@ library(tidytext)
 library(igraph)
 library(ggraph)
 data("stop_words")
-data_loc ='F:/School/Capstone/Data sets/cord-19_2020-04-10/2020-04-10'
+data_loc ='F:/Science/Capstone/Data sets/cord-19_2020-04-10/2020-04-10/'
 
 
 #### reading in the data ####
-meta_data<-read_csv(paste(data_loc,"/metadata.csv"))
+meta_data<-read_csv(paste0(data_loc,"metadata.csv"))
 
 colnames(meta_data)
 
@@ -31,13 +31,8 @@ bigram_graph<-bigram_counts%>%
   filter(n>=50)%>%
   graph_from_data_frame()
 
-bg_graph<-ggraph(bigram_graph, layout = "fr") +
-  geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, end_cap = circle(.07, 'inches')) +
-  geom_node_point(color = "lightblue", size = 5) +
-  geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
-  theme_void()
-
 filtered_graph<-bigram_graph%>%delete_vertices(V(bigram_graph)[degree(bigram_graph)<10])
+
 
 ggraph(filtered_graph, layout = "fr") +
   geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, end_cap = circle(.07, 'inches')) +
@@ -45,10 +40,13 @@ ggraph(filtered_graph, layout = "fr") +
   geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
   theme_void()
 
-
-R0_graph<-bigram_counts%>%
+R0_bigrams<-bigram_counts%>%
   filter(word1 == 'transmission' | word2 == 'transmission')%>%
+  filter(n>50)
+
+R0_graph<-R0_bigrams%>%
   graph_from_data_frame()
+
 
 ggraph(R0_graph, layout = "fr") +
   geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, end_cap = circle(.07, 'inches')) +
