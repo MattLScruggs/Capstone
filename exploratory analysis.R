@@ -12,6 +12,8 @@ meta_data<-read_csv(paste0(data_loc,"metadata.csv"))
 
 colnames(meta_data)
 
+#### Identifying and visualizing bigrams ####
+
 abs_df<-meta_data[,c('cord_uid','abstract')]%>%
   unnest_tokens(bigram, abstract, token = 'ngrams', n=2)%>%
   filter(!is.na(bigram))
@@ -39,6 +41,9 @@ ggraph(filtered_graph, layout = "fr") +
   geom_node_point(color = "lightblue", size = 5) +
   geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
   theme_void()
+
+#### identifying bigrams with the word "transmission" ####
+
 
 R0_bigrams<-bigram_counts%>%
   filter(word1 == 'transmission' | word2 == 'transmission')%>%
