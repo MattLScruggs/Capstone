@@ -35,3 +35,11 @@ pattern = "[A-Z]+:\\s+"
 structured_abs<-early_articles%>%
   filter(grepl(pattern,abstract, perl=TRUE))
 
+headers<-structured_abs$abstract%>%
+  str_extract_all(pattern)
+
+structured_abs$headers<-headers
+
+
+
+
