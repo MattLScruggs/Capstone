@@ -4,13 +4,17 @@ library(tidytext)
 library(igraph)
 library(ggraph)
 data("stop_words")
-data_loc ='F:/Science/Capstone/Data sets/cord-19_2020-04-10/2020-04-10/'
+data_loc ='F:/Science/Capstone/Data sets/cord-19_2022-06-02.tar/cord-19_2022-06-02/2022-06-02/'
 
 
 #### reading in the data ####
-meta_data<-read_csv(paste0(data_loc,"metadata.csv"))
+meta_data_sample<-read.csv(paste0(data_loc,"metadata.csv"), nrows=10)
+colnames(meta_data_sample)
+all_cols<-as.list(apply(meta_data_sample, 2, class))
+cols_needed <- c("cord_uid","abstract","journal","publish_time")
+all_cols[!names(all_cols) %in% cols_needed] = list(NULL)
 
-colnames(meta_data)
+meta_data<- read.csv(paste0(data_loc, "metadata.csv"), header=TRUE, colClasses = all_cols)
 
 #### Identifying and visualizing bigrams ####
 
@@ -59,4 +63,5 @@ ggraph(R0_graph, layout = "fr") +
   geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
   theme_void()
 
+#### split 
 
