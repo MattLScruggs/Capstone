@@ -28,7 +28,7 @@ early_articles$year <- format(early_articles$publish_time, "%Y")
 prop.table(table(as.integer(early_articles$year)))
 
 
-#find abstracts with colons and uppercase letters like INTRODUCTION: 
+#### find abstracts with colons and uppercase letters like INTRODUCTION:####
 
 pattern = "[A-Z]+:\\s+"
 
@@ -40,6 +40,16 @@ headers<-structured_abs$abstract%>%
 
 structured_abs$headers<-headers
 
+pattern2<-"METHODS: (.*?) RESULTS:"
 
+structured_abs$method_text<- str_extract(structured_abs$abstract, pattern2)
+
+structured_abs<-structured_abs%>%
+  drop_na()
+
+methods_df<-structured_abs%>%
+  select(cord_uid,journal,publish_time,year,method_text)
+
+#### analyzing methodology text ####
 
 
