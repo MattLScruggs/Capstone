@@ -52,4 +52,32 @@ methods_df<-structured_abs%>%
 
 #### analyzing methodology text ####
 
+abs_df<-methods_df%>%
+  unnest_tokens(bigram, method_text, token = 'ngrams', n=2)%>%
+  filter(!is.na(bigram))
+
+
+bigram_sep<-abs_df%>%
+  separate(bigram, c("word1", "word2"), sep = " ")%>%
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word)
+
+bigram_counts<-bigram_sep%>%
+  count(word1, word2, sort =T)
+
+
+
+bigram_graph<-bigram_counts%>%
+  filter(n>=50)%>%
+  graph_from_data_frame()
+
+filtered_graph<-bigram_graph%>%delete_vertices(V(bigram_graph)[degree(bigram_graph)<10])
+
+
+ggraph(filtered_graph, layout = "fr") +
+  geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, end_cap = circle(.07, 'inches')) +
+  geom_node_point(color = "lightblue", size = 5) +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+  theme_void()
+
 
