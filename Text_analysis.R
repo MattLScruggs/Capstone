@@ -11,7 +11,11 @@ selected_data<-read.csv(paste0(data_loc,"selected_metadata.csv"))
 
 
 results_list<-strsplit(selected_data$results_text,split =" ")%>%unlist()
-methods_list<-strsplit(selected_data$methods_text,split =" ")%>%unlist()
+
+methods_list<-selected_data$methods_text%>%
+  #as.character()%>%
+  strsplit(split =" ")%>%
+  unlist()
 full_list<-append(results_list, methods_list)
 
 word_counts<-table(full_list)%>%
