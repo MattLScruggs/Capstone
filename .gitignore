@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
+selected_metadata.csv
+structured_abstracts.csv

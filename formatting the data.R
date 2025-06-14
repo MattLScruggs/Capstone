@@ -4,7 +4,7 @@ library(tidytext)
 library(igraph)
 library(ggraph)
 data("stop_words")
-data_loc ='F:/Science/Capstone/Data sets/cord-19_2022-06-02.tar/cord-19_2022-06-02/2022-06-02/'
+data_loc ='Q:/Projects/Capstone/'
 
 
 #### reading in the data ####
@@ -18,66 +18,74 @@ meta_data<- read.csv(paste0(data_loc, "metadata.csv"), header=TRUE, colClasses =
 
 meta_data$publish_time<-as.Date(meta_data$publish_time)
 
-early_articles<-meta_data%>%
-  filter(publish_time< '2021-01-01')
 
-#what years are represented here?
 
-early_articles$year <- format(early_articles$publish_time, "%Y")
-
-prop.table(table(as.integer(early_articles$year)))
 
 
 #### find abstracts with colons and uppercase letters like INTRODUCTION:####
 
 pattern = "[A-Z]+:\\s+"
 
-structured_abs<-early_articles%>%
+structured_abs<-meta_data%>%
   filter(grepl(pattern,abstract, perl=TRUE))
 
-headers<-structured_abs$abstract%>%
-  str_extract_all(pattern)
+#headers<-structured_abs$abstract%>%
+#  str_extract_all(pattern)%>%
+#  unlist()
 
-structured_abs$headers<-headers
+#header_counts<-table(headers)%>%
+#  as.data.frame()%>%
+#  arrange(desc(Freq))
 
-pattern2<-"METHODS: (.*?) RESULTS:"
+structured_abs$year <- format(structured_abs$publish_time, "%Y")
 
-structured_abs$method_text<- str_extract(structured_abs$abstract, pattern2)
+methods_pattern<-"METHODS: (.*?) [A-Z]+:"
+
+structured_abs$method_text<- str_extract(structured_abs$abstract, methods_pattern)%>%
+  str_replace(pattern = "METHODS: ",replacement ="")
+
+results_pattern<-"RESULTS: (.*?) [A-Z]+:"
+
+structured_abs$results_text<- str_extract(structured_abs$abstract, results_pattern)%>%
+  str_replace(pattern = "RESULTS: ",replacement ="")
 
 structured_abs<-structured_abs%>%
   drop_na()
 
-methods_df<-structured_abs%>%
-  select(cord_uid,journal,publish_time,year,method_text)
+epidemiology_studies<-structured_abs%>%
+  filter(grepl('epidemiological study', abstract, perl=TRUE))
 
-#### analyzing methodology text ####
+epidemiology_studies$abstract[1]
+epidemiology_studies$abstract[2]
+epidemiology_studies$abstract[6]
+epidemiology_studies$abstract[41]
+epidemiology_studies$abstract[31]
 
-abs_df<-methods_df%>%
-  unnest_tokens(bigram, method_text, token = 'ngrams', n=2)%>%
-  filter(!is.na(bigram))
+es_1<-epidemiology_studies$cord_uid[1]
+es_2<-epidemiology_studies$cord_uid[2]
+es_3<-epidemiology_studies$cord_uid[6]
+es_4<-epidemiology_studies$cord_uid[41]
+es_5<-epidemiology_studies$cord_uid[31]
 
-
-bigram_sep<-abs_df%>%
-  separate(bigram, c("word1", "word2"), sep = " ")%>%
-  filter(!word1 %in% stop_words$word) %>%
-  filter(!word2 %in% stop_words$word)
-
-bigram_counts<-bigram_sep%>%
-  count(word1, word2, sort =T)
-
-
-
-bigram_graph<-bigram_counts%>%
-  filter(n>=50)%>%
-  graph_from_data_frame()
-
-filtered_graph<-bigram_graph%>%delete_vertices(V(bigram_graph)[degree(bigram_graph)<10])
+case_reports<-structured_abs%>%
+  filter(grepl('a case report of', abstract, perl=TRUE))
 
 
-ggraph(filtered_graph, layout = "fr") +
-  geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, end_cap = circle(.07, 'inches')) +
-  geom_node_point(color = "lightblue", size = 5) +
-  geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
-  theme_void()
+case_reports$abstract[3]
+cr_1<-case_reports$cord_uid[3]
+case_reports$abstract[34]
+cr_2<-case_reports$cord_uid[34]
+case_reports$abstract[116]
+cr_3<-case_reports$cord_uid[116]
+cr_4<-case_reports$cord_uid[3]
+cr_5<-case_reports$cord_uid[4]
+case_reports$abstract[6600]
+case_reports$abstract[6672]
 
+cord_id_list<-c(cr_1,cr_2,cr_3,cr_4,cr_5,es_1,es_2,es_3,es_4,es_5)
+
+selected_df<-structured_abs%>%filter(cord_uid %in% cord_id_list)
+
+write.csv(selected_df,file=paste0(data_loc,"selected_metadata.csv"))
+write.csv(structured_abs, file=paste0(data_loc, "structured_abstracts.csv"))
 
