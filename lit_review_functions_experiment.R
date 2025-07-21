@@ -302,19 +302,19 @@ calc_baseline_tf_idf<-function(word_data_frame, word_col, line_col){
     summarize(n())
   
   
-  names(tf_df)[names(tf_df)=="n()"]<-"count"
+  names(tf_df)[names(tf_df)=="n()"]<-"count" # # of times that word occurs in a block
   
   tf_total<-tf_df%>%
     group_by(line)%>%
     summarize(sum(count))
   
-  names(tf_total)[names(tf_total)=="sum(count)"]<-"total"
+  names(tf_total)[names(tf_total)=="sum(count)"]<-"total" # # of times word is used overall
   
   idf_df<-word_data_frame%>%
     group_by(word)%>%
     summarize(n_distinct(line))
   
-  names(idf_df)[names(idf_df)=="n_distinct(line)"]<-"line_count"
+  names(idf_df)[names(idf_df)=="n_distinct(line)"]<-"line_count" # # of blocks/lines the word is used in
   
   tf_idf_df<-tf_df%>%
     left_join(tf_total, by = "line")%>%
