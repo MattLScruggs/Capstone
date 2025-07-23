@@ -53,3 +53,19 @@ hist(tfidf_df$tf_idf)
 hist(new_tfidf_df$tf_idf)
 
 ## Remove outliers with a 1 in any of the count variables. These are probably not thematically appropriate terms.
+
+
+test_tf_df<-study_db$abstract_tf_idf
+
+top_sentences<-test_tf_df%>%
+  group_by(line)%>%
+  summarize(score=sum(tf_idf))
+
+sentences<-study_db$sentence_df%>%
+  left_join(top_sentences, by=c("block"="line"))%>%
+  drop_na()%>%
+  arrange(desc(score))
+
+sentences$sentence[1:5]
+
+### Must must must clean the input text data better.
